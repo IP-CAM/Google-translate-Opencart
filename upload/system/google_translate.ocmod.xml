@@ -2,10 +2,46 @@
 <modification>
     <name>Google Translate</name>
     <code>google_translate</code>
-    <version>0.1alpha</version>
+    <version>0.2</version>
     <author>Nick Hlushpenko</author>
     <link>https://hlushpenko.top</link>
     <file path="admin/view/template/catalog/product_form.twig">
+        <operation>
+            <search><![CDATA[{{ footer }} ]]></search>
+            <add position="before"><![CDATA[
+            <script>
+            function decodeHtmlEntities(text) {
+                var txt = document.createElement('textarea');
+                txt.innerHTML = text;
+                return txt.value;
+            }
+            function getTranslateText(text, lang_id) {
+                return new Promise(function(resolve, reject) {
+                    $.ajax({
+                        url: 'index.php?route=extension/module/google_translate/translate&user_token={{ user_token }}',
+                        type: 'post',
+                        data: {
+                            text: text,
+                            language_id: lang_id
+                        },
+                        dataType: 'json',
+                        success: function(json) {
+                            if (json['translated']) {
+                                resolve(json['translated']);  // Повертаємо переклад через resolve
+                            } else {
+                                reject('Translation failed');  // Обробка помилки
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            reject('AJAX error: ' + error);  // Обробка помилки у разі невдалого запиту
+                        }
+                    });
+                });
+            }
+            </script>
+
+]]></add>
+        </operation>
         <operation>
             <search><![CDATA[<input type="text" name="product_description[{{ language.language_id }}][name]"]]></search>
             <add position="before">
@@ -13,28 +49,51 @@
                 <div class="input-group-prepend">
                     <button type="button" class="btn btn-sm btn-primary" id="button-translate-name-{{ language.language_id }}"><i class="fa fa-sitemap"></i></button>
                 </div>
-                    <script >
-                        $('#button-translate-name-{{ language.language_id }}').on('click', function() {
-                            let nameField = $('input[name="product_description[{{ language.language_id }}][name]"]');
-                            $.ajax({
-                                url: 'index.php?route=extension/module/google_translate/translate&user_token={{ user_token }}',
-                                type: 'post',
-                                data: {
-                                    text: nameField.val(),
-                                    language_id: '{{ language.language_id }}'
-                                },
-                                dataType: 'json',
-                                success: function(json) {
-                                    if (json['translated']) {
-                                        nameField.val(json['translated']);
-                                    }
-                                }
-                            });
-                        });
-                    </script>
+                <script>
+                    $('#button-translate-name-{{ language.language_id }}').on('click', function() {
+                    let nameField = $('input[name="product_description[{{ language.language_id }}][name]"]');
+
+                    getTranslateText(nameField.val(), {{ language.language_id }}).then(function(translatedText) {
+                        if (translatedText) {
+                            nameField.val(translatedText);
+                        }
+                    }).catch(function(error) {
+                        console.error('Помилка перекладу:', error);
+                    });
+                });
+                </script>
                 ]]>
             </add>
         </operation>
+
+        <operation>
+            <search><![CDATA[<textarea name="product_description[{{ language.language_id }}][description]"]]></search>
+            <add position="before">
+                <![CDATA[
+                <div class="input-group-prepend">
+                    <button type="button" class="btn btn-sm btn-primary" id="button-translate-description-{{ language.language_id }}"><i class="fa fa-sitemap"></i></button>
+                </div>
+                <script>
+                    $('#button-translate-description-{{ language.language_id }}').on('click', function() {
+                    let descriptionField = $('textarea[name="product_description[{{ language.language_id }}][description]"]');
+
+                    getTranslateText(descriptionField.summernote('code'), {{ language.language_id }}).then(function(translatedText) {
+                        if (translatedText) {
+
+                            let decodedText = decodeHtmlEntities(translatedText);
+
+                            descriptionField.summernote('code', decodedText);
+                        }
+                    }).catch(function(error) {
+                        console.error('Помилка перекладу:', error);
+                    });
+                });
+                </script>
+                ]]>
+            </add>
+        </operation>
+
+
     </file>
 </modification>
 
