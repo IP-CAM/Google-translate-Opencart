@@ -1,14 +1,13 @@
 <?php
 
-class LibreTranslate {
+class GoogleTranslate {
 
-    function translate($text, $sourceLang, $targetLang, $apiKey) {
+    function translate($text,  $targetLang, $apiKey) {
 
         $url = 'https://translation.googleapis.com/language/translate/v2?key=' . $apiKey;
 
         $data = array(
             'q' => $text,
-            'source' => $sourceLang,
             'target' => $targetLang,
             'format' => 'text',
         );

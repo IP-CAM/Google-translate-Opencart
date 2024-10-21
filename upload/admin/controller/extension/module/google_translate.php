@@ -45,21 +45,48 @@ class ControllerExtensionModuleGoogleTranslate extends Controller {
             'href' => $this->url->link($this->module_path, 'user_token=' . $this->session->data['user_token'], true)
         );
 
-        $data['status'] = $this->config->get('module_libre_translate_status');
+        $data['status'] = $this->config->get('module_google_translate_status');
         $data['api_key'] = $this->config->get('module_google_translate_key');
-
-
-//        require_once(DIR_SYSTEM . 'library/libre_translate.php');
-
-        //$libre_translate = new LibreTranslate();
-
-
-        //echo $libre_translate->translate("Copper", "en", "uk");
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
 
         $this->response->setOutput($this->load->view($this->module_path, $data));
+    }
+
+
+    public function translate(){
+
+        if(!$this->config->get('module_google_translate_status') || !$this->config->get('module_google_translate_key')){
+            return;
+        }
+
+        if(empty($this->request->post['language_id']) || empty($this->request->post['text'])){
+            return;
+        }
+
+        $this->load->model('localisation/language');
+
+
+
+        $target_lang = $this->model_localisation_language->getLanguage($this->request->post['language_id']);
+
+        if(empty($target_lang)){
+            return;
+        }
+
+        $target_lang = substr($target_lang['code'], 0, 2);
+
+        $api_key = $this->config->get('module_google_translate_key');
+
+        require_once(DIR_SYSTEM . 'library/google_translate.php');
+
+        $google_translate = new GoogleTranslate();
+
+        $json['translated'] = $google_translate->translate($this->request->post['text'], $target_lang, $api_key);
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
     }
 }

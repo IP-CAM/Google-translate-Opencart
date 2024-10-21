@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Google Translate</name>
+    <code>google_translate</code>
+    <version>0.1alpha</version>
+    <author>Nick Hlushpenko</author>
+    <link>https://hlushpenko.top</link>
+    <file path="admin/view/template/catalog/product_form.twig">
+        <operation>
+            <search><![CDATA[<input type="text" name="product_description[{{ language.language_id }}][name]"]]></search>
+            <add position="before">
+                <![CDATA[
+                <div class="input-group-prepend">
+                    <button type="button" class="btn btn-sm btn-primary" id="button-translate-name-{{ language.language_id }}"><i class="fa fa-sitemap"></i></button>
+                </div>
+                    <script >
+                        $('#button-translate-name-{{ language.language_id }}').on('click', function() {
+                            let nameField = $('input[name="product_description[{{ language.language_id }}][name]"]');
+                            $.ajax({
+                                url: 'index.php?route=extension/module/google_translate/translate&user_token={{ user_token }}',
+                                type: 'post',
+                                data: {
+                                    text: nameField.val(),
+                                    language_id: '{{ language.language_id }}'
+                                },
+                                dataType: 'json',
+                                success: function(json) {
+                                    if (json['translated']) {
+                                        nameField.val(json['translated']);
+                                    }
+                                }
+                            });
+                        });
+                    </script>
+                ]]>
+            </add>
+        </operation>
+    </file>
+</modification>
+
+
