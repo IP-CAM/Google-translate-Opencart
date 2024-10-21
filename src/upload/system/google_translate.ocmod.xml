@@ -2,7 +2,7 @@
 <modification>
     <name>Google Translate</name>
     <code>google_translate</code>
-    <version>0.2</version>
+    <version>1.0</version>
     <author>Nick Hlushpenko</author>
     <link>https://hlushpenko.top</link>
     <file path="admin/view/template/catalog/product_form.twig">
