@@ -1,0 +1,12 @@
+{
+  "name": "google_translate_opencart_module",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "author": "Nick Hlushpenko",
+  "dependencies": {
+    "archiver": "^7.0.1"
+  }
+}
